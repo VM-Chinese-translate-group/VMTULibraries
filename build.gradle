@@ -1,12 +1,20 @@
 plugins {
     id 'java'
-    id 'com.gradleup.shadow' version '9.+' apply false
+    id 'com.gradleup.shadow' version '9.+'
     id 'maven-publish'
 }
 
 base.archivesName = libs.versions.core.name.get()
 version = libs.versions.core.version.get()
 group = libs.versions.core.group.get()
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://libraries.minecraft.net/' }
+    maven { url = 'https://maven.fabricmc.net/' }
+    maven { url = 'https://files.minecraftforge.net/maven' }
+    maven { url = 'https://repo.runelite.net/' }
+}
 
 subprojects {
     apply plugin: 'java'
@@ -48,4 +56,27 @@ subprojects {
             expand(version: project.version)
         }
     }
+}
+
+dependencies {
+    shadow(project(":common"))
+    shadow(project(":modpack"))
+    shadow(project(":resourcepack"))
+}
+
+shadowJar {
+    configurations = [project.configurations.shadow]
+    relocate("com.google.archivepatcher", "include.com.google.archivepatcher")
+    dependencies {
+        include(project(':common'))
+        include(project(':modpack'))
+        include(project(':resourcepack'))
+        include(dependency('net.runelite.archive-patcher:archive-patcher-applier:.*'))
+    }
+    exclude 'LICENSE'
+    archiveClassifier.set('')
+}
+
+jar {
+    archiveClassifier.set('raw')
 }
