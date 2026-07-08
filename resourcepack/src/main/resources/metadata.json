@@ -136,6 +136,15 @@
       "convertFrom": [
         "1.19"
       ]
+    },
+    {
+      "gameVersions": "(26.1.2,26.2]",
+      "packFormat": 88,
+      "minFormat": 85,
+      "maxFormat": 88,
+      "convertFrom": [
+        "1.19"
+      ]
     }
   ],
   "assets": [
