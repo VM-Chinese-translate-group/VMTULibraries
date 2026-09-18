@@ -1,7 +1,7 @@
 [versions]
 core-name = "VMTULibraries"
 core-group = "top.vmctcn.vmtu.libraries"
-core-version = "0.4.3"
+core-version = "0.5.0"
 
 archive-patcher-applier = "1.2"
 log4j = "2.26.1"

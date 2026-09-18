@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v7
       -
         name: Set up JDK
-        uses: actions/setup-java@v5
+        uses: actions/setup-java@v6
         with:
           distribution: 'oracle'
           java-version: '21'
@@ -30,7 +30,7 @@ jobs:
         run: |
           ./gradlew clean build --info --stacktrace
       -
-        uses: actions/upload-artifact@v6
+        uses: actions/upload-artifact@v7
         with:
           name: VMTULibraries-${{ inputs.type }}-${{ github.run_number }}
           path: | 

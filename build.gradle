@@ -21,13 +21,16 @@ subprojects {
     apply plugin: 'maven-publish'
 
     java {
-        toolchain {
-            languageVersion = JavaLanguageVersion.of(8)
-        }
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
         
         withSourcesJar()
+    }
+
+    tasks.withType(JavaCompile).configureEach {
+        // Gradle 9 must run on a modern JDK. Compile against the Java 8 API
+        // instead of requiring a separately detected Java 8 toolchain.
+        options.release = 8
     }
 
     repositories {
@@ -43,17 +46,18 @@ subprojects {
     }
 
     dependencies {
-        implementation libs.archive.patcher.applier
-        implementation libs.log4j
-        compileOnly libs.jetbrains.annotations
+        implementation rootProject.libs.archive.patcher.applier
+        implementation rootProject.libs.log4j
+        compileOnly rootProject.libs.jetbrains.annotations
 
-        implementation libs.commons.io
-        implementation libs.gson
+        implementation rootProject.libs.commons.io
+        implementation rootProject.libs.gson
     }
 
+    def resourceVersion = project.version.toString()
     tasks.named('processResources') {
         filesMatching('**') {
-            expand(version: project.version)
+            expand(version: resourceVersion)
         }
     }
 }
