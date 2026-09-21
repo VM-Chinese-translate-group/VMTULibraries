@@ -2,65 +2,20 @@ package top.vmctcn.vmtu.libraries.modpack.info.impl;
 
 import top.vmctcn.vmtu.libraries.modpack.info.api.ModpackInfo;
 
+import java.util.Collections;
+
 public class DefaultModpackInfo extends ModpackInfo {
     public DefaultModpackInfo() {
-        this.modpack = new DefaultModpack();
-    }
-
-    @Override
-    public ModpackInfo.Modpack getModpack() {
-        return super.getModpack();
-    }
-
-    public static class DefaultModpack extends ModpackInfo.Modpack {
-        public DefaultModpack() {
-            this.name = "ExampleModpack";
-            this.version = "0.1.0";
-            this.translation = new DefaultTranslation();
-        }
-
-        @Override
-        public String getName() {
-            return super.getName();
-        }
-
-        @Override
-        public String getVersion() {
-            return super.getVersion();
-        }
-
-        @Override
-        public ModpackInfo.Translation getTranslation() {
-            return super.getTranslation();
-        }
-    }
-
-    public static class DefaultTranslation extends ModpackInfo.Translation {
-        public DefaultTranslation() {
-            this.id = "example";
-            this.url = "https://vmct-cn.top/modpacks/example/";
-            this.language = "zh_cn";
-            this.version = "1.0.0";
-        }
-
-        @Override
-        public String getId() {
-            return super.getId();
-        }
-
-        @Override
-        public String getUrl() {
-            return super.getUrl();
-        }
-
-        @Override
-        public String getLanguage() {
-            return super.getLanguage();
-        }
-
-        @Override
-        public String getVersion() {
-            return super.getVersion();
-        }
+        this.formatVersion = 1;
+        this.id = "example";
+        this.name = "ExampleModpack 简体中文汉化";
+        this.description = "Example patch pack information";
+        this.language = "zh_cn";
+        this.version = "1.0.0";
+        this.modpackVersion = "0.1.0";
+        this.modpackVersionRange = "[0.1.0]";
+        this.authors = Collections.singletonList("ExampleAuthor");
+        this.url = "https://vmct-cn.top/modpacks/example/";
+        getModpack();
     }
 }
