@@ -5,6 +5,9 @@ public class ExtraResourcePackInfo {
     private final int customIndex;
     private final boolean loadPack;
 
+    /**
+     * @param name ZIP file name (including .zip) or folder name inside resourcepacks
+     */
     public ExtraResourcePackInfo(String name, int customExtraPackIndex, boolean loadPack) {
         this.name = name;
         this.customIndex = customExtraPackIndex;

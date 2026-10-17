@@ -53,7 +53,8 @@ public class GameOptionsWriter {
     }
 
     public void addResourcePack(int gameMajorVersion, String resourcePackName, ResourcePackInfo resourcePackInfo, ExtraResourcePackInfo extraPackInfo) {
-        boolean canLoadExtraPack = false;
+        boolean canLoadExtraPack = extraPackInfo.isLoadPack()
+                && extraPackInfo.getName() != null && !extraPackInfo.getName().isEmpty();
         String resourcePack = (gameMajorVersion <= 12 ? "" : "file/") + resourcePackName;
         boolean needDownloadResourcePack = resourcePackInfo.isDownloadPack();
         String extraResourcePack = (gameMajorVersion <= 12 ? "" : "file/") + extraPackInfo.getName();
@@ -61,8 +62,8 @@ public class GameOptionsWriter {
         List<String> resourcePacks = GSON.fromJson(
                 configs.computeIfAbsent("resourcePacks", it -> "[]"), STRING_LIST_TYPE);
 
-        //If resource packs already contains target resource pack, nothing to do
-        if (resourcePacks.contains(resourcePack)) {
+        // Extra packs may still need to be added when the main pack is already enabled.
+        if (resourcePacks.contains(resourcePack) && !canLoadExtraPack) {
             return;
         }
 
@@ -93,10 +94,6 @@ public class GameOptionsWriter {
                 CommonContexts.LOGGER.info(LogMarkers.RESOURCEPACK, "Get CFPA pack name: {}", packName);
                 break;
             }
-        }
-
-        if (extraPackInfo.isLoadPack() && extraResourcePack != null && extraResourcePack.isEmpty()) {
-            canLoadExtraPack = true;
         }
 
         // set pack index
@@ -131,10 +128,10 @@ public class GameOptionsWriter {
             case DEFAULT:
             default:
                 //Remove resource pack, we need re-index
-                resourcePacks = removeResourcePacks(resourcePacks, resourcePack, null, needDownloadResourcePack, false);
+                resourcePacks = removeResourcePacks(resourcePacks, resourcePack, extraResourcePack, needDownloadResourcePack, canLoadExtraPack);
 
                 // re-index
-                setResourcePacks(resourcePacks, cfpaPackName, resourcePack, null, needDownloadResourcePack, false, ResourcePackIndex.DEFAULT, 0);
+                setResourcePacks(resourcePacks, cfpaPackName, resourcePack, extraResourcePack, needDownloadResourcePack, canLoadExtraPack, ResourcePackIndex.DEFAULT, 0);
 
                 break;
         }
@@ -145,13 +142,13 @@ public class GameOptionsWriter {
 
     public static List<String> removeResourcePacks(List<String> resourcePacks, String resourcePackName, String extraPackName, boolean canDownloadResourcePack, boolean canLoadExtraPack) {
         if (canDownloadResourcePack) {
-            if (extraPackName != null) {
-                return resourcePacks.stream().filter(it -> !it.contains("Minecraft-Mod-Language-Modpack") && !it.contains(extraPackName) && !it.contains(resourcePackName)).collect(Collectors.toList());
+            if (canLoadExtraPack && extraPackName != null) {
+                return resourcePacks.stream().filter(it -> !it.contains("Minecraft-Mod-Language-Modpack") && !it.equals(extraPackName) && !it.contains(resourcePackName)).collect(Collectors.toList());
             } else {
                 return resourcePacks.stream().filter(it -> !it.contains("Minecraft-Mod-Language-Modpack") && !it.contains(resourcePackName)).collect(Collectors.toList());
             }
         } else if (canLoadExtraPack && extraPackName != null) {
-            return resourcePacks.stream().filter(it -> !it.contains("Minecraft-Mod-Language-Modpack") && !it.contains(extraPackName)).collect(Collectors.toList());
+            return resourcePacks.stream().filter(it -> !it.contains("Minecraft-Mod-Language-Modpack") && !it.equals(extraPackName)).collect(Collectors.toList());
         } else {
             return resourcePacks.stream().filter(it -> !it.contains("Minecraft-Mod-Language-Modpack")).collect(Collectors.toList());
         }
@@ -159,17 +156,6 @@ public class GameOptionsWriter {
 
     public static void setResourcePacks(List<String> resourcePacks, String cfpaPackName, String resourcePackName, String extraPackName, boolean canDownloadResourcePack, boolean canLoadExtraPack, ResourcePackIndex resourcePackIndex, int customIndex) {
         switch (resourcePackIndex) {
-            case TOP_OF_CFPA:
-                if (cfpaPackName != null) {
-                    resourcePacks.add(cfpaPackName);
-                }
-                if (canDownloadResourcePack) {
-                    resourcePacks.add(resourcePackName);
-                }
-                if (canLoadExtraPack) {
-                    resourcePacks.add(extraPackName);
-                }
-                break;
             case BOTTOM_OF_CFPA:
                 if (canDownloadResourcePack) {
                     resourcePacks.add(resourcePackName);
@@ -193,12 +179,16 @@ public class GameOptionsWriter {
                 }
                 break;
             case DEFAULT:
+            case TOP_OF_CFPA:
             default:
                 if (cfpaPackName != null) {
                     resourcePacks.add(cfpaPackName);
                 }
                 if (canDownloadResourcePack) {
                     resourcePacks.add(resourcePackName);
+                }
+                if (canLoadExtraPack) {
+                    resourcePacks.add(extraPackName);
                 }
                 break;
         }
