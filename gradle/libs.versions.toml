@@ -1,14 +1,14 @@
 [versions]
 core-name = "VMTULibraries"
 core-group = "top.vmctcn.vmtu.libraries"
-core-version = "0.5.0"
+core-version = "0.5.1"
 
 archive-patcher-applier = "1.2"
 log4j = "2.26.1"
 jetbrains-annotations = "26.1.0"
 
 commons-io = "2.22.0"
-gson = "2.14.0"
+gson = "2.15.0"
 
 [libraries]
 archive-patcher-applier = { module = "net.runelite.archive-patcher:archive-patcher-applier", version.ref = "archive-patcher-applier" }
