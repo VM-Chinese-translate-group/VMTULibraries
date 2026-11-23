@@ -5,7 +5,7 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public enum MirrorSources {
-    MAXING_CDN("http://cdn.maxing.site/"),
+    VMCT_ESA("https://files.vmct.top/vm-resources/"),
     GITEE("https://gitee.com/Wulian233/vmtu/raw/main/"),
     CNB("https://cnb.cool/VMChineseTranslationGroup/VM-Resources/-/git/raw/main/"),
     GITHUB("https://raw.githubusercontent.com/VM-Chinese-translate-group/VM-Resources/refs/heads/main/");
