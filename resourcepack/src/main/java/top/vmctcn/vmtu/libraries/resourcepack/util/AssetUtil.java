@@ -69,8 +69,8 @@ public class AssetUtil {
             }
 
             // 全部失败，返回默认 URL
-            CommonContexts.LOGGER.info(LogMarkers.RESOURCEPACK, "All urls are unreachable, using MAXING_CDN");
-            return MirrorSources.MAXING_CDN.getMirrorUrl();
+            CommonContexts.LOGGER.info(LogMarkers.RESOURCEPACK, "All urls are unreachable, using VMCT_ESA");
+            return MirrorSources.VMCT_ESA.getMirrorUrl();
 
         } finally {
             executor.shutdownNow();
@@ -78,11 +78,10 @@ public class AssetUtil {
     }
 
     private static String testUrlConnection(String url) throws IOException {
-        HttpURLConnection conn = (HttpURLConnection) new URL(url).openConnection();
+        HttpURLConnection conn = (HttpURLConnection) new URL(url + "resourcepack/metadata.json").openConnection();
         conn.setRequestMethod("HEAD");
         conn.setConnectTimeout(3000);
         conn.setReadTimeout(5000);
-        conn.connect();
         int code = conn.getResponseCode();
         if (code >= 200 && code < 300) {
             return url;
