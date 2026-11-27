@@ -34,3 +34,18 @@ shadowJar {
 jar {
     archiveClassifier.set('raw')
 }
+
+// Dependency-free deterministic regression test, also run by check.
+tasks.register('mirrorProbeRegression', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'top.vmctcn.vmtu.libraries.resourcepack.util.MirrorProbeSelectorTest'
+}
+tasks.named('check') { dependsOn tasks.named('mirrorProbeRegression') }
+
+// The standalone regression is executed by mirrorProbeRegression, not by a test framework.
+// Gradle 9 otherwise fails when test sources exist but no framework tests are discovered.
+tasks.named('test', Test) {
+    failOnNoDiscoveredTests = false
+    dependsOn tasks.named('mirrorProbeRegression')
+}

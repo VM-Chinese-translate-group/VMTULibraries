@@ -35,58 +35,34 @@ public class AssetUtil {
     }
 
     public static String getFastestUrl() {
-        ExecutorService executor = Executors.newFixedThreadPool(Math.max(mirrors.size(), 10));
-        try {
-            List<CompletableFuture<String>> futures = new ArrayList<>();
-            mirrors.forEach(mirrorSources -> {
-                CompletableFuture<String> future = CompletableFuture.supplyAsync(() -> {
-                    try {
-                        return testUrlConnection(mirrorSources.getMirrorUrl());
-                    } catch (IOException e) {
-                        return null; // 表示失败
-                    }
-                }, executor);
-                futures.add(future);
-            });
-
-            // 阻塞等待最快完成且成功的任务
-            String fastest = null;
-            while (!futures.isEmpty()) {
-                CompletableFuture<Object> first = CompletableFuture.anyOf(futures.toArray(new CompletableFuture[0]));
-                fastest = (String) first.join();
-
-                // 移除已完成的 future
-                futures.removeIf(CompletableFuture::isDone);
-
-                if (fastest != null) {
-                    // 成功，取消其他任务
-                    for (CompletableFuture<String> f : futures) {
-                        f.cancel(true);
-                    }
-                    CommonContexts.LOGGER.info(LogMarkers.RESOURCEPACK, "Using fastest url: {}", fastest);
-                    return fastest;
-                }
-            }
-
-            // 全部失败，返回默认 URL
-            CommonContexts.LOGGER.info(LogMarkers.RESOURCEPACK, "All urls are unreachable, using VMCT_ESA");
-            return MirrorSources.VMCT_ESA.getMirrorUrl();
-
-        } finally {
-            executor.shutdownNow();
+        List<Callable<String>> probes = new ArrayList<>();
+        for (MirrorSources mirror : mirrors) {
+            probes.add(() -> testUrlConnection(mirror.getMirrorUrl()));
         }
+        ExecutorService executor = Executors.newFixedThreadPool(Math.max(mirrors.size(), 1));
+        String fastest = MirrorProbeSelector.firstSuccessful(probes, executor, 10, TimeUnit.SECONDS);
+        if (fastest != null) {
+            CommonContexts.LOGGER.info(LogMarkers.RESOURCEPACK, "Using fastest url: {}", fastest);
+            return fastest;
+        }
+        CommonContexts.LOGGER.info(LogMarkers.RESOURCEPACK, "No successful mirror probe, using VMCT_ESA");
+        return MirrorSources.VMCT_ESA.getMirrorUrl();
     }
 
     private static String testUrlConnection(String url) throws IOException {
         HttpURLConnection conn = (HttpURLConnection) new URL(url + "resourcepack/metadata.json").openConnection();
-        conn.setRequestMethod("HEAD");
-        conn.setConnectTimeout(3000);
-        conn.setReadTimeout(5000);
-        int code = conn.getResponseCode();
-        if (code >= 200 && code < 300) {
-            return url;
+        try {
+            conn.setRequestMethod("HEAD");
+            conn.setConnectTimeout(3000);
+            conn.setReadTimeout(5000);
+            int code = conn.getResponseCode();
+            if (code >= 200 && code < 300) {
+                return url;
+            }
+            CommonContexts.LOGGER.debug(LogMarkers.RESOURCEPACK, "URL unreachable: {}, code: {}", url, code);
+            throw new IOException("URL unreachable: " + url);
+        } finally {
+            conn.disconnect();
         }
-        CommonContexts.LOGGER.debug(LogMarkers.RESOURCEPACK, "URL unreachable: {}, code: {}", url, code);
-        throw new IOException("URL unreachable: " + url);
     }
 }
