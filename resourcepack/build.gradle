@@ -34,3 +34,11 @@ shadowJar {
 jar {
     archiveClassifier.set('raw')
 }
+
+// Dependency-free deterministic regression test, also run by check.
+tasks.register('mirrorProbeRegression', JavaExec) {
+    dependsOn testClasses
+    classpath = sourceSets.test.runtimeClasspath
+    mainClass = 'top.vmctcn.vmtu.libraries.resourcepack.util.MirrorProbeSelectorTest'
+}
+tasks.named('check') { dependsOn tasks.named('mirrorProbeRegression') }
